@@ -1,66 +1,90 @@
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import MUIDataTable from "mui-datatables";
 import createCache from '@emotion/cache';
 import { ThemeProvider, createTheme } from '@material-ui/core/styles';
 import { CacheProvider } from '@emotion/react';
-
+import Firebase from './Firebase'
+import moment from 'moment';
 const muiCache = createCache({
     key: 'mui-datatables',
     prepend: true
 })
 export default function Sidebars() {
+    const [alldata, setAlldata] = useState([])
     const handleLogout = () => {
         localStorage.removeItem("Login")
     }
+    useEffect(() => {
+        getdata()
+
+    }, [])
+
+    const getdata = () => {
+        let data = []
+        let db = Firebase.firestore();
+        db.collection("inquiry")
+            .get()
+            .then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+
+                    data.push(doc.data())
+                    setAlldata(data)
+                });
+            })
+            .catch((error) => {
+                console.log("Error getting documents: ", error);
+            });
+    }
     const [toggled, setToggled] = useState(false);
     const [broken, setBroken] = useState(window.matchMedia('(max-width: 800px)').matches);
-    const columns = [
-        {
-            name: "name",
-            label: "Name",
-            options: {
-                filter: true,
-                sort: true,
-            }
-        },
-        {
-            name: "company",
-            label: "Company",
-            options: {
-                filter: true,
-                sort: false,
-            }
-        },
-        {
-            name: "city",
-            label: "City",
-            options: {
-                filter: true,
-                sort: false,
-            }
-        },
-        {
-            name: "state",
-            label: "State",
-            options: {
-                filter: true,
-                sort: false,
-            }
-        },
-        {
-            label: "Contect",
-            name: "contect"
+    const columns = [{
+        name: "name",
+        label: "name",
+        options: {
+            filter: true,
+            sort: false,
         }
+    },
+    {
+        name: "email",
+        label: "email",
+        options: {
+            filter: true,
+            sort: true,
+        }
+    },
+    {
+        name: "message",
+        label: "message",
+        options: {
+            filter: true,
+            sort: false,
+        }
+    },
+    {
+        name: "tnd",
+        label: "tnd",
+        options: {
+            filter: true,
+            sort: false,
+            customBodyRender: (value) => {
+                return (
+                    <>
+                        {moment(value).fromNow()} {/* Use moment.js to format time ago */}
+                    </>
+                );
+            },
+        }
+    },
+    {
+        label: "id",
+        name: "id"
+    }
 
     ];
-    const data = [
-        { name: "Disu", company: "Decode-softtech", city: "Surat", state: "GJ", contect: "8140401032" },
-        { name: "John Walsh", company: "Test Corp", city: "Hartford", state: "CT" },
-        { name: "Bob Herm", company: "Test Corp", city: "Tampa", state: "FL" },
-
-    ];
+    const data = alldata
     const options = {
         filterType: 'checkbox',
     };
