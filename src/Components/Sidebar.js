@@ -71,9 +71,9 @@ export default function Sidebars() {
             sort: false,
             customBodyRender: (value) => {
                 return (
-                    <>
+                    <div>
                         {moment(value).fromNow()} {/* Use moment.js to format time ago */}
-                    </>
+                    </div>
                 );
             },
         }
